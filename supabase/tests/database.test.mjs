@@ -738,3 +738,32 @@ describe('get_survey_results (D24)', () => {
     await rejects(instructor(`select get_survey_results(gen_random_uuid())`), 'SURVEY_NOT_FOUND')
   })
 })
+
+describe('historical results (Phase 10)', () => {
+  test('archiving and unarchiving keep responses and results unchanged', async () => {
+    const { survey, mc, tf } = await createCompleteSurvey('History')
+    await activate(survey.id)
+    for (const [i, pick] of [0, 1, 1].entries()) {
+      await submit(survey.id, `history-${i}`, [
+        { question_id: mc.id, choice_id: mc.choices[pick].id },
+        { question_id: tf.id, choice_id: tf.choices[1].id },
+      ])
+    }
+    await close(survey.id)
+
+    const results = async () =>
+      (await instructor(`select get_survey_results($1) as r`, [survey.id]))[0].r
+    const { status: _closed, ...before } = await results()
+
+    await instructor(`update surveys set status = 'archived' where id = $1`, [survey.id])
+    const archived = await results()
+    assert.equal(archived.status, 'archived')
+    const { status: _archived, ...whileArchived } = archived
+    assert.deepEqual(whileArchived, before)
+
+    await instructor(`update surveys set status = 'closed' where id = $1`, [survey.id])
+    const { status: _unarchived, ...after } = await results()
+    assert.deepEqual(after, before)
+    assert.equal(before.response_count, 3)
+  })
+})

@@ -371,3 +371,22 @@ If a step fails, the editor stays open with the changes kept, and saved work is 
 - After a successful or duplicate submission, the browser remembers that survey's ID, and reopening it shows "You have already submitted a response to this survey." straight away. The database's duplicate check stays the real protection.
 
 **Why:** Students on any browser can submit, and they aren't asked to answer a survey that will then be rejected.
+
+---
+
+## D26 — CSV export details
+
+**Specs said:** D14 fixes the CSV's columns, headers and file name. API.md §12 says the browser fetches the data and builds the CSV, with no server endpoint.
+
+**Decision:**
+
+- **Export CSV** is on the Results page. The browser loads the survey's questions and every response with its chosen choices, oldest first.
+- Responses are loaded in pages of 1,000, because Supabase returns at most 1,000 rows per request by default. Large surveys are never cut off.
+- `submitted_at` is the instructor's local time as `YYYY-MM-DD HH:MM:SS`, which Excel and Google Sheets read as a date and time.
+- Values follow RFC 4180: quoted when they contain a comma, quote, line break or a space at either end, with quotes doubled, and CRLF line endings.
+- The file starts with a UTF-8 byte order mark, so Excel shows accents and emoji correctly.
+- The file name's title part is made file-safe: lowercase, accents removed, other characters turned into `-`, for example `cafe-quiz-2_2026-11-02.csv`. A title with no usable characters becomes `survey`.
+- Cells starting with `=`, `+`, `-` or `@` are **not** prefixed to block spreadsheet formulas. Every text in the export is written by the signed-in instructor (students only pick choices), and a prefix would change honest choices such as `-1`.
+- The CSV logic is unit tested with Vitest (`npm test`).
+
+**Why:** The file opens correctly in common spreadsheet apps without extra steps, and no responses are lost on large surveys.

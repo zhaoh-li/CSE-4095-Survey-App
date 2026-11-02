@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import ConfirmDialog from '../components/ConfirmDialog'
 import LoadingMessage from '../components/LoadingMessage'
 import { toAppError } from '../lib/errors'
+import { fileSafe } from '../lib/format'
 import { buttonDanger, buttonPrimary, buttonSecondary } from '../lib/styles'
 import { closeSurvey, getResponseCount, getSurvey } from '../lib/surveys'
 import type { Survey } from '../lib/types'
@@ -15,16 +16,6 @@ type LoadState =
   | { forId: string; kind: 'ready'; survey: Survey }
   | { forId: string; kind: 'not_found' }
   | { forId: string; kind: 'error'; message: string }
-
-/** "Recursion Check!" → "recursion-check" for the PNG file name. */
-function fileSafe(title: string): string {
-  return (
-    title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '') || 'survey'
-  )
-}
 
 export default function PresentPage() {
   const { id = '' } = useParams()

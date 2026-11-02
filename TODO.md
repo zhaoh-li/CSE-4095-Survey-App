@@ -181,24 +181,27 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 
 # Phase 10 — Historical Results
 
-- [ ] Allow viewing results for Closed surveys.
-- [ ] Allow viewing results for Archived surveys.
-- [ ] Add filtering by date (dashboard From/To filters, D16).
-- [ ] Add filtering by survey title.
-- [ ] Preserve all historical response data.
+- [x] Allow viewing results for Closed surveys.
+- [x] Allow viewing results for Archived surveys.
+- [x] Add filtering by date (dashboard From/To filters, D16).
+- [x] Add filtering by survey title.
+- [x] Preserve all historical response data.
+- [x] Test that archiving and unarchiving keep responses and results unchanged.
 
 ---
 
 # Phase 11 — CSV Export
 
-- [ ] Add Export CSV button.
-- [ ] Export survey metadata.
-- [ ] Export one row per response.
-- [ ] Use the CSV columns, headers and file name from DECISIONS.md (D14).
-- [ ] Include submission timestamp.
-- [ ] Include each question and answer.
-- [ ] Create safe CSV escaping.
-- [ ] Test export with spreadsheet applications.
+- [x] Add Export CSV button.
+- [x] Export survey metadata.
+- [x] Export one row per response.
+- [x] Use the CSV columns, headers and file name from DECISIONS.md (D14).
+- [x] Include submission timestamp.
+- [x] Include each question and answer.
+- [x] Create safe CSV escaping.
+- [x] Load responses in pages so exports over 1,000 responses are complete (D26).
+- [x] Add unit tests for the CSV logic, run with `npm test` (D26).
+- [x] Test export with spreadsheet applications.
 
 ---
 

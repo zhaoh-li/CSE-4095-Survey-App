@@ -3,7 +3,11 @@ import { Link, useParams } from 'react-router-dom'
 import LoadingMessage from '../components/LoadingMessage'
 import ResultsChart from '../components/ResultsChart'
 import StatusBadge from '../components/StatusBadge'
+import { buildSurveyCsv, csvFileName } from '../lib/csv'
+import { toLocalDateTimeString } from '../lib/dates'
+import { downloadTextFile } from '../lib/download'
 import { toAppError } from '../lib/errors'
+import { fetchSurveyExport } from '../lib/export'
 import { formatPercent, plural } from '../lib/format'
 import { buttonPrimary, buttonSecondary } from '../lib/styles'
 import { getSurveyResults } from '../lib/surveys'
@@ -26,6 +30,8 @@ export default function ResultsPage() {
   const [results, setResults] = useState<SurveyResults | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState<string | null>(null)
 
   const apply = useCallback(
     (result: LoadResult) => {
@@ -54,6 +60,21 @@ export default function ResultsPage() {
     setRefreshing(true)
     apply(await fetchResults(id))
     setRefreshing(false)
+  }
+
+  /** D14, D26: one survey's responses as a CSV download. */
+  async function exportCsv() {
+    setExporting(true)
+    setExportError(null)
+    try {
+      const { survey, responses } = await fetchSurveyExport(id)
+      const csv = buildSurveyCsv(survey.title, survey.questions, responses, toLocalDateTimeString)
+      downloadTextFile(csvFileName(survey.title, new Date()), csv)
+    } catch (error) {
+      setExportError(toAppError(error).message)
+    } finally {
+      setExporting(false)
+    }
   }
 
   if (loadedFor !== id) return <LoadingMessage text="Loading results..." />
@@ -85,6 +106,9 @@ export default function ResultsPage() {
         <button type="button" onClick={refresh} disabled={refreshing} className={buttonPrimary}>
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
+        <button type="button" onClick={exportCsv} disabled={exporting} className={buttonSecondary}>
+          {exporting ? 'Exporting...' : 'Export CSV'}
+        </button>
         {results.status === 'active' && (
           <Link to={`/surveys/${id}/present`} className={buttonSecondary}>
             Present QR
@@ -95,10 +119,13 @@ export default function ResultsPage() {
         </Link>
       </div>
 
-      {error && (
-        <p role="alert" className="rounded-lg bg-red-50 p-3 text-red-800">
-          {error}
-        </p>
+      {[error, exportError].map(
+        (message) =>
+          message && (
+            <p key={message} role="alert" className="rounded-lg bg-red-50 p-3 text-red-800">
+              {message}
+            </p>
+          ),
       )}
 
       {results.response_count === 0 && (

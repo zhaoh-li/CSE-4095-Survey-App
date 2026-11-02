@@ -15,3 +15,13 @@ export function toLocalDateString(iso: string): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
+
+/** Local date and time as "YYYY-MM-DD HH:MM:SS", which spreadsheets read as a date (D26). */
+export function toLocalDateTimeString(iso: string): string {
+  const date = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return (
+    `${toLocalDateString(iso)} ` +
+    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+  )
+}

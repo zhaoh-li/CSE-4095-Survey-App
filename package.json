@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:db": "node --test supabase/tests/*.test.mjs"
+    "test:db": "node --test supabase/tests/*.test.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
@@ -38,6 +39,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0",
     "typescript-eslint": "^8.72.1",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
   }
 }
