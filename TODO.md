@@ -24,29 +24,31 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 
 # Phase 2 — Supabase Project and Database
 
-- [ ] Create a Supabase project.
-- [ ] Create the `surveys` table.
-- [ ] Create the `questions` table.
-- [ ] Create the `choices` table.
-- [ ] Create the `responses` table.
-- [ ] Create the `answers` table.
-- [ ] Add foreign-key constraints.
-- [ ] Add database indexes.
-- [ ] Add timestamps.
-- [ ] Add survey-status validation.
-- [ ] Create Row Level Security policies.
-- [ ] Create the `get_public_survey(p_slug)` function (see DECISIONS.md, D2).
-- [ ] Create the `submit_survey_response` function with all validation checks (D3, D5, D7, D15).
-- [ ] Create the `activate_survey` and `close_survey` functions, with activation checks (D8, D10).
-- [ ] Do not create anonymous read or insert policies; students use only the two public functions (D5).
-- [ ] Disable public sign-ups in Supabase Auth (D6).
-- [ ] Create the instructor account manually in the Supabase dashboard (D6).
-- [ ] Verify students cannot read survey results.
-- [ ] Verify students cannot insert directly into `responses` or `answers`.
-- [ ] Verify anonymous students can load active surveys through `get_public_survey`.
-- [ ] Verify `get_public_survey` returns only a status for closed surveys and nothing for unknown slugs.
-- [ ] Verify anonymous students can submit responses through `submit_survey_response`.
-- [ ] Verify authenticated instructors have full access.
+- [x] Create a Supabase project.
+- [x] Create the `surveys` table.
+- [x] Create the `questions` table.
+- [x] Create the `choices` table.
+- [x] Create the `responses` table.
+- [x] Create the `answers` table.
+- [x] Add foreign-key constraints.
+- [x] Add database indexes.
+- [x] Add timestamps.
+- [x] Add survey-status validation.
+- [x] Create Row Level Security policies.
+- [x] Create the `get_public_survey(p_slug)` function (see DECISIONS.md, D2).
+- [x] Create the `submit_survey_response` function with all validation checks (D3, D5, D7, D15).
+- [x] Create the `activate_survey` and `close_survey` functions, with activation checks (D8, D10).
+- [x] Do not create anonymous read or insert policies; students use only the two public functions (D5).
+- [x] Enforce the status and editing rules in the database (D18).
+- [x] Add automated database tests, run with `npm run test:db` (D18).
+- [x] Disable public sign-ups in Supabase Auth (D6).
+- [x] Create the instructor account manually in the Supabase dashboard (D6).
+- [x] Verify students cannot read survey results.
+- [x] Verify students cannot insert directly into `responses` or `answers`.
+- [x] Verify anonymous students can load active surveys through `get_public_survey`.
+- [x] Verify `get_public_survey` returns only a status for closed surveys and nothing for unknown slugs.
+- [x] Verify anonymous students can submit responses through `submit_survey_response`.
+- [x] Verify authenticated instructors have full access.
 
 ---
 

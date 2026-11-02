@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:db": "node --test supabase/tests/*.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
@@ -20,6 +21,7 @@
     "recharts": "^3.10.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.19.2",

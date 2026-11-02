@@ -258,3 +258,23 @@ These are checked in the editor (shown next to the field, as UI.md §5 asks) and
 If a step fails, the editor stays open with the changes kept, and saved work is not lost.
 
 **Why:** Students should never get an older version than what the instructor sees, and one click from editor to QR code suits preparing right before class.
+
+---
+
+## D18 — The database enforces the status and editing rules
+
+**Specs said:** D4, D8 and D9 describe which edits and status changes are allowed, and D10 lists activation checks, but API.md only defines error codes for student submissions. Without database checks, a direct table update could skip these rules.
+
+**Decision:** Triggers in the migration enforce the rules for every caller, and instructor actions use these error codes:
+
+| Code | When |
+|---|---|
+| `SURVEY_NOT_FOUND` | `activate_survey` or `close_survey` is given an unknown survey ID. |
+| `SURVEY_INCOMPLETE` | Activation fails a D10 check. The error's detail says which one. |
+| `SURVEY_NOT_EDITABLE` | Changing the title, description, questions or choices of a survey that is not a draft (D4). |
+| `INVALID_STATUS_CHANGE` | A status change not allowed by D9, making a survey active without `activate_survey`, changing `public_slug`, inserting a survey that isn't a new draft, or deleting an active survey. |
+
+- Deleting a whole survey still removes its questions and choices (DATABASE.md §13).
+- The rules are tested with `npm run test:db`, which runs the migration in PGlite (Postgres in WebAssembly) as both an anonymous student and a signed-in instructor.
+
+**Why:** The rules hold even if the frontend has a bug or someone calls the API directly, so stored responses can't be detached from their questions by accident.
