@@ -3,7 +3,13 @@
 
 import { toAppError } from './errors'
 import { supabase } from './supabase'
-import type { Survey, SurveyWithCount } from './types'
+import type {
+  Survey,
+  SurveyDraftPayload,
+  SurveyResults,
+  SurveyWithCount,
+  SurveyWithQuestions,
+} from './types'
 
 type SurveyRow = Survey & { responses: { count: number }[] }
 
@@ -50,4 +56,72 @@ export async function duplicateSurvey(id: string): Promise<string> {
   const { data, error } = await supabase.rpc('duplicate_survey', { p_survey_id: id })
   if (error) throw toAppError(error)
   return data as string
+}
+
+/** One survey, or null if it doesn't exist. */
+export async function getSurvey(id: string): Promise<Survey | null> {
+  const { data, error } = await supabase.from('surveys').select('*').eq('id', id).maybeSingle()
+  if (error) throw toAppError(error)
+  return data as Survey | null
+}
+
+/** One survey with its questions and choices in display order, or null. */
+export async function getSurveyWithQuestions(id: string): Promise<SurveyWithQuestions | null> {
+  const { data, error } = await supabase
+    .from('surveys')
+    .select('*, questions(*, choices(*))')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw toAppError(error)
+  if (!data) return null
+
+  const survey = data as SurveyWithQuestions
+  survey.questions.sort((a, b) => a.position - b.position)
+  for (const question of survey.questions) question.choices.sort((a, b) => a.position - b.position)
+  return survey
+}
+
+/** The currently active survey, if any. */
+export async function getActiveSurvey(): Promise<Pick<Survey, 'id' | 'title'> | null> {
+  const { data, error } = await supabase
+    .from('surveys')
+    .select('id, title')
+    .eq('status', 'active')
+    .maybeSingle()
+  if (error) throw toAppError(error)
+  return data
+}
+
+/** Creates (id = null) or replaces a whole draft (D22). Returns the survey ID. */
+export async function saveSurveyDraft(
+  id: string | null,
+  payload: SurveyDraftPayload,
+): Promise<string> {
+  const { data, error } = await supabase.rpc('save_survey_draft', {
+    p_survey_id: id,
+    p_title: payload.title,
+    p_description: payload.description,
+    p_questions: payload.questions,
+  })
+  if (error) throw toAppError(error)
+  return data as string
+}
+
+export async function getResponseCount(surveyId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('responses')
+    .select('*', { count: 'exact', head: true })
+    .eq('survey_id', surveyId)
+  if (error) throw toAppError(error)
+  return count ?? 0
+}
+
+/** Per-question and per-choice counts (D24). Returns null if the survey doesn't exist. */
+export async function getSurveyResults(id: string): Promise<SurveyResults | null> {
+  const { data, error } = await supabase.rpc('get_survey_results', { p_survey_id: id })
+  if (error) {
+    if (error.message === 'SURVEY_NOT_FOUND') return null
+    throw toAppError(error)
+  }
+  return data as SurveyResults
 }

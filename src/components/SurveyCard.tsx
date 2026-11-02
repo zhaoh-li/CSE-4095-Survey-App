@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { formatDate } from '../lib/dates'
+import { plural } from '../lib/format'
 import {
   ACTION_LABELS,
   ACTION_PATHS,
@@ -18,8 +19,7 @@ interface SurveyCardProps {
 }
 
 export default function SurveyCard({ survey, busy, onAction }: SurveyCardProps) {
-  const responses =
-    survey.response_count === 1 ? '1 response' : `${survey.response_count} responses`
+  const responses = plural(survey.response_count, 'response')
 
   return (
     <article

@@ -5,6 +5,7 @@ const MESSAGES: Record<string, string> = {
   // Instructor actions (D18)
   SURVEY_NOT_FOUND: 'This survey no longer exists. Refresh the page.',
   SURVEY_INCOMPLETE: 'This survey is not ready to activate.',
+  TITLE_REQUIRED: 'Enter a survey title.',
   SURVEY_NOT_EDITABLE: 'Only draft surveys can be edited. Duplicate it to make an editable copy.',
   INVALID_STATUS_CHANGE:
     "That action isn't allowed for this survey's current status. Refresh the page and try again.",

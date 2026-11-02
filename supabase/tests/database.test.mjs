@@ -570,3 +570,171 @@ describe('duplicate_survey (D19)', () => {
     await rejects(instructor(`select duplicate_survey(gen_random_uuid())`), 'SURVEY_NOT_FOUND')
   })
 })
+
+const saveDraft = async (id, title, description, questions) =>
+  (
+    await instructor(`select save_survey_draft($1, $2, $3, $4) as id`, [
+      id,
+      title,
+      description,
+      JSON.stringify(questions),
+    ])
+  )[0].id
+
+const draftStructure = (surveyId) =>
+  instructor(
+    `select q.question_text, q.question_type, q.position, c.choice_text, c.position as choice_position
+     from questions q join choices c on c.question_id = q.id
+     where q.survey_id = $1 order by q.position, c.position`,
+    [surveyId],
+  )
+
+describe('save_survey_draft (D22, D23)', () => {
+  const questions = [
+    {
+      question_text: '  What is required for recursion? ',
+      question_type: 'multiple_choice',
+      choices: [{ choice_text: 'A base case' }, { choice_text: ' A loop ' }],
+    },
+    { question_text: 'Recursion needs a stopping condition.', question_type: 'true_false' },
+  ]
+
+  test('creates a new draft with questions and choices in order', async () => {
+    const id = await saveDraft(null, ' New survey ', '', questions)
+    const [survey] = await instructor(`select * from surveys where id = $1`, [id])
+    assert.equal(survey.title, 'New survey')
+    assert.equal(survey.description, null)
+    assert.equal(survey.status, 'draft')
+
+    assert.deepEqual(
+      (await draftStructure(id)).map((r) => [r.position, r.choice_position, r.choice_text]),
+      [
+        [1, 1, 'A base case'],
+        [1, 2, 'A loop'],
+        [2, 1, 'True'],
+        [2, 2, 'False'],
+      ],
+    )
+    const [first] = await draftStructure(id)
+    assert.equal(first.question_text, 'What is required for recursion?')
+  })
+
+  test('True/False questions always get exactly True and False', async () => {
+    const id = await saveDraft(null, 'TF', null, [
+      {
+        question_text: 'Is it?',
+        question_type: 'true_false',
+        choices: [{ choice_text: 'Yes' }, { choice_text: 'No' }, { choice_text: 'Maybe' }],
+      },
+    ])
+    assert.deepEqual(
+      (await draftStructure(id)).map((r) => r.choice_text),
+      ['True', 'False'],
+    )
+  })
+
+  test('saving again replaces the questions and updates the title', async () => {
+    const id = await saveDraft(null, 'Before', 'Old', questions)
+    await saveDraft(id, 'After', 'New', [
+      { question_text: 'Only question', question_type: 'true_false' },
+    ])
+    const [survey] = await instructor(`select * from surveys where id = $1`, [id])
+    assert.equal(survey.title, 'After')
+    assert.equal(survey.description, 'New')
+    assert.deepEqual(
+      (await draftStructure(id)).map((r) => [r.question_text, r.choice_text]),
+      [
+        ['Only question', 'True'],
+        ['Only question', 'False'],
+      ],
+    )
+  })
+
+  test('a draft may be incomplete but needs a title', async () => {
+    const id = await saveDraft(null, 'Incomplete', null, [
+      { question_text: '', question_type: 'multiple_choice', choices: [] },
+    ])
+    await rejects(activate(id), 'SURVEY_INCOMPLETE')
+    await rejects(saveDraft(null, '   ', null, []), 'TITLE_REQUIRED')
+  })
+
+  test('a saved complete draft can be activated', async () => {
+    const id = await saveDraft(null, 'Ready', null, questions)
+    const result = await activate(id)
+    assert.equal(result.status, 'active')
+    await close(id)
+  })
+
+  test('only drafts can be saved', async () => {
+    const { survey } = await createCompleteSurvey('Not a draft')
+    await activate(survey.id)
+    await close(survey.id)
+    await rejects(saveDraft(survey.id, 'x', null, []), 'SURVEY_NOT_EDITABLE')
+    await rejects(
+      saveDraft('00000000-0000-0000-0000-000000000000', 'x', null, []),
+      'SURVEY_NOT_FOUND',
+    )
+  })
+
+  test('students cannot save surveys', async () => {
+    await rejects(
+      anon(`select save_survey_draft(null, 'x', null, '[]'::jsonb)`),
+      'permission denied',
+    )
+  })
+})
+
+describe('get_survey_results (D24)', () => {
+  test('returns counts and percentages per choice', async () => {
+    const { survey, mc, tf } = await createCompleteSurvey('Results RPC')
+    await activate(survey.id)
+    for (const [i, pick] of [0, 0, 1].entries()) {
+      await submit(survey.id, `rpc-${i}`, [
+        { question_id: mc.id, choice_id: mc.choices[pick].id },
+        { question_id: tf.id, choice_id: tf.choices[0].id },
+      ])
+    }
+
+    const [{ r }] = await instructor(`select get_survey_results($1) as r`, [survey.id])
+    assert.equal(r.title, 'Results RPC')
+    assert.equal(r.status, 'active')
+    assert.equal(r.response_count, 3)
+    assert.deepEqual(
+      r.questions.map((q) => q.response_count),
+      [3, 3],
+    )
+    assert.deepEqual(
+      r.questions[0].choices.map((c) => [c.choice_text, c.count, c.percentage]),
+      [
+        ['A base case', 2, 66.7],
+        ['A pointer', 1, 33.3],
+        ['A loop', 0, 0],
+      ],
+    )
+    assert.deepEqual(
+      r.questions[1].choices.map((c) => [c.choice_text, c.count, c.percentage]),
+      [
+        ['True', 3, 100],
+        ['False', 0, 0],
+      ],
+    )
+    await close(survey.id)
+  })
+
+  test('a survey with no responses has zero counts', async () => {
+    const { survey } = await createCompleteSurvey('No results')
+    const [{ r }] = await instructor(`select get_survey_results($1) as r`, [survey.id])
+    assert.equal(r.response_count, 0)
+    assert.ok(r.questions.every((q) => q.response_count === 0))
+    assert.ok(r.questions.flatMap((q) => q.choices).every((c) => c.percentage === 0))
+  })
+
+  test('students cannot read results', async () => {
+    const survey = await createSurvey('Private results')
+    await rejects(anon(`select get_survey_results($1)`, [survey.id]), 'permission denied')
+  })
+
+  test('an unknown survey ID is rejected', async () => {
+    await rejects(instructor(`select get_survey_results(gen_random_uuid())`), 'SURVEY_NOT_FOUND')
+  })
+})

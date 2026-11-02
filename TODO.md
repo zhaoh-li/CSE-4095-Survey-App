@@ -91,87 +91,91 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 
 # Phase 5 — Survey Editor
 
-- [ ] Create a survey editor page.
-- [ ] Add survey title field.
-- [ ] Add optional description field.
-- [ ] Add questions dynamically.
-- [ ] Support Multiple Choice questions.
-- [ ] Support True / False questions.
-- [ ] Auto-create read-only "True" and "False" choices for True/False questions (D13).
-- [ ] Confirm before changing a question's type when it already has choices (D13).
-- [ ] Block activation of incomplete surveys and show errors next to the fields (D10).
-- [ ] Make the editor's Activate button save first, then activate and open the Present page (D17).
-- [ ] Add answer choices dynamically.
-- [ ] Reorder questions.
-- [ ] Reorder choices.
-- [ ] Delete questions.
-- [ ] Delete choices.
-- [ ] Validate required fields.
-- [ ] Save a survey as Draft.
-- [ ] Load an existing survey for editing.
-- [ ] Allow editing only Draft surveys (see DECISIONS.md, D4).
+- [x] Create the `save_survey_draft` database function (D22).
+- [x] Create a survey editor page.
+- [x] Add survey title field.
+- [x] Add optional description field.
+- [x] Add questions dynamically.
+- [x] Support Multiple Choice questions.
+- [x] Support True / False questions.
+- [x] Auto-create read-only "True" and "False" choices for True/False questions (D13).
+- [x] Confirm before changing a question's type when it already has choices (D13).
+- [x] Block activation of incomplete surveys and show errors next to the fields (D10).
+- [x] Make the editor's Activate button save first, then activate and open the Present page (D17).
+- [x] Add answer choices dynamically.
+- [x] Reorder questions.
+- [x] Reorder choices.
+- [x] Delete questions.
+- [x] Delete choices.
+- [x] Validate required fields.
+- [x] Save a survey as Draft.
+- [x] Load an existing survey for editing.
+- [x] Allow editing only Draft surveys (see DECISIONS.md, D4).
+- [x] Warn before leaving with unsaved changes (D22).
 
 ---
 
 # Phase 6 — Survey Activation
 
-- [ ] Add activation logic.
-- [ ] Ensure at most one survey is Active.
-- [ ] Automatically close the previously active survey.
-- [ ] Generate a public survey slug (see DECISIONS.md, D1).
-- [ ] Generate the public survey URL.
-- [ ] Generate a QR code from the public URL.
-- [ ] Create a Present Survey page.
-- [ ] Display survey title and QR code.
-- [ ] Display a readable fallback URL.
-- [ ] Add a Close Survey button.
-- [ ] Add a Download QR Code button.
-- [ ] Show the number of submitted responses on the Present page.
-- [ ] Refresh the response count every 5 seconds while the Present page is open (D12).
+- [x] Add activation logic.
+- [x] Ensure at most one survey is Active.
+- [x] Automatically close the previously active survey.
+- [x] Generate a public survey slug (see DECISIONS.md, D1).
+- [x] Generate the public survey URL.
+- [x] Generate a QR code from the public URL.
+- [x] Create a Present Survey page.
+- [x] Display survey title and QR code.
+- [x] Display a readable fallback URL.
+- [x] Add a Close Survey button.
+- [x] Add a Download QR Code button.
+- [x] Show the number of submitted responses on the Present page.
+- [x] Refresh the response count every 5 seconds while the Present page is open (D12).
 
 ---
 
 # Phase 7 — Student Survey Page
 
-- [ ] Create the public route `/s/:slug`.
-- [ ] Load the survey through `get_public_survey`.
-- [ ] Show an error if the survey does not exist.
-- [ ] Show a message if the survey is closed.
-- [ ] Render survey title and description.
-- [ ] Render Multiple Choice questions.
-- [ ] Render True / False questions.
-- [ ] Require an answer to every question, in the frontend and in the submission function (see DECISIONS.md, D3).
-- [ ] Add Submit button.
-- [ ] Store response and answers in Supabase.
-- [ ] Show a submission confirmation page.
-- [ ] Make the entire experience mobile friendly.
+- [x] Create the public route `/s/:slug`.
+- [x] Load the survey through `get_public_survey`.
+- [x] Show an error if the survey does not exist.
+- [x] Show a message if the survey is closed.
+- [x] Render survey title and description.
+- [x] Render Multiple Choice questions.
+- [x] Render True / False questions.
+- [x] Require an answer to every question, in the frontend and in the submission function (see DECISIONS.md, D3).
+- [x] Add Submit button.
+- [x] Store response and answers in Supabase.
+- [x] Show a submission confirmation page.
+- [x] Make the entire experience mobile friendly.
 
 ---
 
 # Phase 8 — Duplicate Submission Protection
 
-- [ ] Generate an anonymous browser token.
-- [ ] Store the token in local storage.
-- [ ] Save the token with each response.
-- [ ] Prevent the same token from submitting twice to the same survey.
-- [ ] Show a friendly message if a duplicate submission is attempted.
-- [ ] Add a database uniqueness constraint if appropriate.
-- [ ] Reject submissions without a token in `submit_survey_response` with `MISSING_TOKEN` (D7, D15).
+- [x] Generate an anonymous browser token.
+- [x] Store the token in local storage.
+- [x] Save the token with each response.
+- [x] Prevent the same token from submitting twice to the same survey.
+- [x] Show a friendly message if a duplicate submission is attempted.
+- [x] Add a database uniqueness constraint if appropriate.
+- [x] Reject submissions without a token in `submit_survey_response` with `MISSING_TOKEN` (D7, D15).
+- [x] Fall back when `crypto.randomUUID` or localStorage is unavailable, and remember submitted surveys (D25).
 
 ---
 
 # Phase 9 — Results Dashboard
 
-- [ ] Create a results page for each survey.
-- [ ] Show total response count.
-- [ ] Aggregate answers by question.
-- [ ] Show counts for each choice.
-- [ ] Show percentages for each choice.
-- [ ] Add bar charts using Recharts.
-- [ ] Clearly label questions with no responses yet.
-- [ ] Add Refresh Results button.
-- [ ] Add link back to the main dashboard.
-- [ ] Show the Present QR action only for Active surveys.
+- [x] Create the `get_survey_results` database function (D24).
+- [x] Create a results page for each survey.
+- [x] Show total response count.
+- [x] Aggregate answers by question.
+- [x] Show counts for each choice.
+- [x] Show percentages for each choice.
+- [x] Add bar charts using Recharts.
+- [x] Clearly label questions with no responses yet.
+- [x] Add Refresh Results button.
+- [x] Add link back to the main dashboard.
+- [x] Show the Present QR action only for Active surveys.
 
 ---
 

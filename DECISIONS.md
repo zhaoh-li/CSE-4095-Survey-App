@@ -312,3 +312,62 @@ If a step fails, the editor stays open with the changes kept, and saved work is 
 **Decision:** The default option is labelled **"All (except archived)"**. Archived surveys appear when **Archived** is chosen in the status filter.
 
 **Why:** Archiving then clears the main list, as the archive confirmation says, while archived results stay one click away.
+
+---
+
+## D22 — The editor saves the whole draft at once: `save_survey_draft`
+
+**Specs said:** API.md lists Create and Update Survey but not how questions and choices are saved.
+
+**Decision:**
+
+- The editor keeps all changes in the browser until **Save Draft** or **Activate**.
+- `save_survey_draft(p_survey_id, p_title, p_description, p_questions)` then saves everything in one transaction. With no ID it creates a new draft. With an ID it updates the title and description and **replaces** all questions and choices, numbering their positions from the order sent.
+- True/False questions always get the fixed choices "True" and "False" (D13), whatever the browser sends.
+- Only drafts can be saved (D4, D18), and it runs with the caller's rights, so only signed-in instructors can use it.
+- Questions are reordered with ↑/↓ buttons, which work with a keyboard and on phones.
+- Leaving the editor with unsaved changes asks for confirmation, both for links inside the app and for closing or refreshing the tab.
+
+**Why:** Replacing is safe because drafts never have responses (only active surveys accept them). One transaction means a failed save never leaves a half-saved survey, and it avoids tracking every added, moved or deleted item.
+
+---
+
+## D23 — Save Draft needs only a title; Activate needs the full D10 checks
+
+**Specs said:** TODO.md asks to "Validate required fields", and D10 lists the checks for activation, but nothing said what a draft needs.
+
+**Decision:**
+
+- **Save Draft** requires a survey title (`TITLE_REQUIRED` from the database). Blank questions or choices are allowed in a draft.
+- **Activate** requires every D10 check. The editor shows each error next to its field and focuses the first one. `activate_survey` checks again.
+- Changing a question's type asks first only if a choice already has text (D13). Deleting a question asks first only if it has any text.
+
+**Why:** Instructors can save unfinished work, while students can never see an incomplete survey.
+
+---
+
+## D24 — Results come from one function: `get_survey_results`
+
+**Specs said:** API.md §11 gives the results shape and prefers "an RPC or database view".
+
+**Decision:**
+
+- `get_survey_results(p_survey_id)` returns the API.md §11 shape, plus the survey's title, status and slug so the page needs one request. Only signed-in instructors can call it.
+- Each choice's percentage uses its question's answer count, rounded to 1 decimal. With D3 that equals the total responses.
+- The results page shows a bar chart per question, with the same counts and percentages in a table, and "No responses yet" for questions without answers.
+
+**Why:** Counting in the database keeps the page fast as responses grow, and the table means the numbers never depend on seeing the chart.
+
+---
+
+## D25 — How the student page uses the browser token
+
+**Specs said:** D7 requires a token from `crypto.randomUUID()` kept in localStorage.
+
+**Decision:**
+
+- `crypto.randomUUID()` only exists on https or localhost. Elsewhere, such as testing from a phone over plain http, the token is built from `crypto.getRandomValues()`.
+- If localStorage is blocked (some private browsing modes), the token lasts until the page closes, so submitting still works.
+- After a successful or duplicate submission, the browser remembers that survey's ID, and reopening it shows "You have already submitted a response to this survey." straight away. The database's duplicate check stays the real protection.
+
+**Why:** Students on any browser can submit, and they aren't asked to answer a survey that will then be rejected.
