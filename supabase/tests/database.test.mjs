@@ -518,3 +518,55 @@ describe('results and deletion (DATABASE.md §12, §13)', () => {
     assert.equal(rows.length, 0)
   })
 })
+
+describe('duplicate_survey (D19)', () => {
+  test('copies the survey, questions and choices into a new draft', async () => {
+    const { survey, mc, tf } = await createCompleteSurvey('Original')
+    await instructor(`update surveys set description = 'Desc' where id = $1`, [survey.id])
+    await activate(survey.id)
+    await submit(survey.id, 'dup-1', [
+      { question_id: mc.id, choice_id: mc.choices[0].id },
+      { question_id: tf.id, choice_id: tf.choices[0].id },
+    ])
+
+    const [{ id }] = await instructor(`select duplicate_survey($1) as id`, [survey.id])
+    const [copy] = await instructor(`select * from surveys where id = $1`, [id])
+    assert.equal(copy.title, 'Copy of Original')
+    assert.equal(copy.description, 'Desc')
+    assert.equal(copy.status, 'draft')
+    assert.equal(copy.public_slug, null)
+
+    const structure = async (surveyId) =>
+      instructor(
+        `select q.question_text, q.question_type, q.position, c.choice_text, c.position as cpos
+         from questions q join choices c on c.question_id = q.id
+         where q.survey_id = $1 order by q.position, c.position`,
+        [surveyId],
+      )
+    assert.deepEqual(await structure(id), await structure(survey.id))
+
+    const [{ count }] = await instructor(
+      `select count(*)::int as count from responses where survey_id = $1`,
+      [id],
+    )
+    assert.equal(count, 0)
+    await close(survey.id)
+  })
+
+  test('the copy is editable even when the original is not', async () => {
+    const { survey } = await createCompleteSurvey('Locked original')
+    await activate(survey.id)
+    const [{ id }] = await instructor(`select duplicate_survey($1) as id`, [survey.id])
+    await instructor(`update surveys set title = 'Edited copy' where id = $1`, [id])
+    await close(survey.id)
+  })
+
+  test('students cannot duplicate surveys', async () => {
+    const survey = await createSurvey('No student copies')
+    await rejects(anon(`select duplicate_survey($1)`, [survey.id]), 'permission denied')
+  })
+
+  test('an unknown survey ID is rejected', async () => {
+    await rejects(instructor(`select duplicate_survey(gen_random_uuid())`), 'SURVEY_NOT_FOUND')
+  })
+})

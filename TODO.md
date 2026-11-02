@@ -54,36 +54,38 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 
 # Phase 3 — Instructor Authentication
 
-- [ ] Create the instructor login page.
-- [ ] Connect login to Supabase Auth.
-- [ ] Add logout.
-- [ ] Create an authentication context/provider.
-- [ ] Create a protected-route component.
-- [ ] Redirect unauthenticated users to login.
-- [ ] Show the logged-in instructor in the dashboard.
+- [x] Create the instructor login page.
+- [x] Connect login to Supabase Auth.
+- [x] Add logout.
+- [x] Create an authentication context/provider.
+- [x] Create a protected-route component.
+- [x] Redirect unauthenticated users to login.
+- [x] Show the logged-in instructor in the dashboard.
 
 ---
 
 # Phase 4 — Instructor Dashboard
 
-- [ ] Create the dashboard layout.
-- [ ] Load surveys from Supabase.
-- [ ] Display survey title, status, and creation date.
-- [ ] Add status badges for Draft, Active, Closed, and Archived.
-- [ ] Add a New Survey button.
-- [ ] Add Edit action.
-- [ ] Add Duplicate action.
-- [ ] Add Delete action.
-- [ ] Add Archive action.
-- [ ] Add View Results action.
-- [ ] Add Activate action.
-- [ ] Add Close action.
-- [ ] Add Unarchive action (D9).
-- [ ] Show only the actions allowed for each status (D9).
-- [ ] Confirm before activating when another survey is active (D11).
-- [ ] Add search by survey title.
-- [ ] Add filtering by status.
-- [ ] Add From/To date filters on `created_at` (D16).
+- [x] Create the dashboard layout.
+- [x] Load surveys from Supabase.
+- [x] Display survey title, status, and creation date.
+- [x] Add status badges for Draft, Active, Closed, and Archived.
+- [x] Add a New Survey button.
+- [x] Add Edit action.
+- [x] Add Duplicate action.
+- [x] Add Delete action.
+- [x] Add Archive action.
+- [x] Add View Results action.
+- [x] Add Activate action.
+- [x] Add Close action.
+- [x] Add Unarchive action (D9).
+- [x] Show only the actions allowed for each status (D9).
+- [x] Confirm before activating when another survey is active (D11).
+- [x] Add search by survey title.
+- [x] Add filtering by status.
+- [x] Add From/To date filters on `created_at` (D16).
+- [x] Hide archived surveys from the default "All" filter (D21).
+- [x] Open the Present page after activating from the dashboard (D20).
 
 ---
 
@@ -198,12 +200,13 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 
 # Phase 12 — Survey Duplication
 
-- [ ] Duplicate survey title and description.
-- [ ] Duplicate questions.
-- [ ] Duplicate answer choices.
-- [ ] Create the copy in Draft state.
-- [ ] Add "Copy of ..." naming.
-- [ ] Redirect to the editor after duplication.
+- [x] Create the `duplicate_survey` database function (D19).
+- [x] Duplicate survey title and description.
+- [x] Duplicate questions.
+- [x] Duplicate answer choices.
+- [x] Create the copy in Draft state.
+- [x] Add "Copy of ..." naming.
+- [x] Redirect to the editor after duplication.
 
 ---
 

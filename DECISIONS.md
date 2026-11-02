@@ -278,3 +278,37 @@ If a step fails, the editor stays open with the changes kept, and saved work is 
 - The rules are tested with `npm run test:db`, which runs the migration in PGlite (Postgres in WebAssembly) as both an anonymous student and a signed-in instructor.
 
 **Why:** The rules hold even if the frontend has a bug or someone calls the API directly, so stored responses can't be detached from their questions by accident.
+
+---
+
+## D19 — Duplicate uses one database function: `duplicate_survey`
+
+**Specs said:** API.md allows duplication "in application logic or an RPC".
+
+**Decision:**
+
+- `duplicate_survey(p_survey_id)` copies the title (as "Copy of …"), description, questions and choices into a new Draft, keeping their order, and returns the new survey's ID. Responses are not copied.
+- It runs with the caller's rights and only signed-in instructors can call it.
+- Any status can be duplicated (D9). The dashboard then opens the editor for the copy.
+
+**Why:** It runs in one transaction, so a failure never leaves a half-copied survey, and it is covered by `npm run test:db`.
+
+---
+
+## D20 — Activating from the dashboard opens the Present page
+
+**Specs said:** D17 sends the editor's Activate button to the Present page, but nothing said what the dashboard's Activate and Reopen do afterwards.
+
+**Decision:** After a successful Activate or Reopen on the dashboard, including after the D11 confirmation, the instructor is taken to that survey's Present page. If activation fails, they stay on the dashboard and see the reason.
+
+**Why:** Activating usually means the QR code is about to be shown, and it matches D17.
+
+---
+
+## D21 — The dashboard's "All" status filter hides archived surveys
+
+**Specs said:** UI.md §4 shows a status filter defaulting to "All", but archiving would have no visible effect if "All" included archived surveys.
+
+**Decision:** The default option is labelled **"All (except archived)"**. Archived surveys appear when **Archived** is chosen in the status filter.
+
+**Why:** Archiving then clears the main list, as the archive confirmation says, while archived results stay one click away.
