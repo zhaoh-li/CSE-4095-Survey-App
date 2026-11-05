@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth-context'
 import { buttonPrimary } from '../lib/styles'
+import { usePageTitle } from '../lib/use-page-title'
 
 export default function LandingPage() {
   const { session } = useAuth()
+  usePageTitle(null)
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">

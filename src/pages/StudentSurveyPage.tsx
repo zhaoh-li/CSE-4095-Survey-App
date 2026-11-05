@@ -1,10 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { getAnonymousToken, hasSubmitted, markSubmitted } from '../lib/anonymous-token'
 import { AppError, toAppError } from '../lib/errors'
 import { getPublicSurvey, submitResponse } from '../lib/student'
 import { buttonPrimary } from '../lib/styles'
 import type { PublicSurvey } from '../lib/types'
+import { usePageTitle } from '../lib/use-page-title'
 
 /** Which screen the student sees (UI.md §8, D2). */
 type View =
@@ -42,6 +43,7 @@ export default function StudentSurveyPage() {
   }, [slug])
 
   const view: View = loaded?.forSlug === slug ? loaded.view : { kind: 'loading' }
+  usePageTitle(view.kind === 'form' ? view.survey.survey.title : 'Survey')
   const show = (next: View) => setLoaded({ forSlug: slug, view: next })
 
   return (
@@ -58,6 +60,13 @@ export default function StudentSurveyPage() {
 }
 
 function Message({ view }: { view: Exclude<View, { kind: 'form' }> }) {
+  const headingRef = useRef<HTMLHeadingElement>(null)
+
+  // Move focus to the message (e.g. "Thank you!") so screen readers announce it.
+  useEffect(() => {
+    if (view.kind !== 'loading') headingRef.current?.focus()
+  }, [view.kind])
+
   const content: Record<typeof view.kind, { title: string; body?: string }> = {
     loading: { title: 'Loading survey...' },
     not_found: { title: 'Survey not found.' },
@@ -76,7 +85,13 @@ function Message({ view }: { view: Exclude<View, { kind: 'form' }> }) {
       role={view.kind === 'loading' ? 'status' : undefined}
       className="rounded-xl bg-white p-8 text-center shadow-sm"
     >
-      <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+      <h1
+        ref={headingRef}
+        tabIndex={-1}
+        className="text-2xl font-bold text-slate-900 focus:outline-none"
+      >
+        {title}
+      </h1>
       {body && <p className="mt-3 text-lg text-slate-700">{body}</p>}
       {view.kind === 'load_error' && (
         <button

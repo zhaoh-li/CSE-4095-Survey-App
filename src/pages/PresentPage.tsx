@@ -8,6 +8,7 @@ import { fileSafe } from '../lib/format'
 import { buttonDanger, buttonPrimary, buttonSecondary } from '../lib/styles'
 import { closeSurvey, getResponseCount, getSurvey } from '../lib/surveys'
 import type { Survey } from '../lib/types'
+import { usePageTitle } from '../lib/use-page-title'
 
 /** D12: how often the response count refreshes while the page is open. */
 const COUNT_REFRESH_MS = 5000
@@ -27,8 +28,10 @@ export default function PresentPage() {
   const [confirmClose, setConfirmClose] = useState(false)
   const [closing, setClosing] = useState(false)
   const [closeError, setCloseError] = useState<string | null>(null)
+  const [fullscreen, setFullscreen] = useState(() => document.fullscreenElement !== null)
 
   const survey = load?.forId === id && load.kind === 'ready' ? load.survey : null
+  usePageTitle(survey ? `Present: ${survey.title}` : 'Present Survey')
   const isActive = survey?.status === 'active' && survey.public_slug !== null
   const slug = survey?.public_slug ?? ''
   // The student link uses this site's own address, so it follows the deployment.
@@ -83,6 +86,20 @@ export default function PresentPage() {
       window.clearInterval(timer)
     }
   }, [id, isActive])
+
+  // Keep the Full screen button's label in sync, including when Escape exits.
+  useEffect(() => {
+    const update = () => setFullscreen(document.fullscreenElement !== null)
+    document.addEventListener('fullscreenchange', update)
+    return () => document.removeEventListener('fullscreenchange', update)
+  }, [])
+
+  function toggleFullscreen() {
+    const request = document.fullscreenElement
+      ? document.exitFullscreen()
+      : document.documentElement.requestFullscreen()
+    request.catch((error) => console.error(error))
+  }
 
   async function handleClose() {
     setClosing(true)
@@ -139,7 +156,7 @@ export default function PresentPage() {
           className="aspect-square w-[min(60vh,90vw)] [image-rendering:pixelated]"
         />
       ) : (
-        <div className="flex aspect-square w-[min(60vh,90vw)] items-center justify-center bg-slate-100 text-slate-500">
+        <div className="flex aspect-square w-[min(60vh,90vw)] items-center justify-center bg-slate-100 text-slate-600">
           Generating QR code...
         </div>
       )}
@@ -171,12 +188,18 @@ export default function PresentPage() {
             Download QR Code
           </a>
         )}
+        {/* Not offered where the browser has no full-screen mode (e.g. iPhone Safari). */}
+        {document.fullscreenEnabled && (
+          <button type="button" onClick={toggleFullscreen} className={buttonSecondary}>
+            {fullscreen ? 'Exit Full Screen' : 'Full Screen'}
+          </button>
+        )}
         <button type="button" onClick={() => setConfirmClose(true)} className={buttonDanger}>
           Close Survey
         </button>
       </div>
 
-      <Link to="/dashboard" className="text-sm text-slate-500 underline">
+      <Link to="/dashboard" className="text-sm text-slate-600 underline">
         Back to Dashboard
       </Link>
 

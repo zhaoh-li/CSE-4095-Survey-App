@@ -27,6 +27,12 @@ dist-ssr
 .env
 .env.*
 !.env.example
+!.env.test.example
 
 # Local Claude Code instructions
 CLAUDE.md
+
+# Playwright output
+test-results/
+playwright-report/
+blob-report/

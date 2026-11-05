@@ -19,7 +19,13 @@ export default function ResultsChart({ choices }: { choices: ResultChoice[] }) {
   return (
     <div aria-hidden="true" style={{ height: data.length * 48 + 16 }}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{ top: 8, right: 96, bottom: 8, left: 8 }}>
+        {/* accessibilityLayer off: otherwise Recharts makes the hidden chart a Tab stop. */}
+        <BarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 8, right: 96, bottom: 8, left: 8 }}
+          accessibilityLayer={false}
+        >
           <XAxis type="number" hide allowDecimals={false} domain={[0, 'dataMax']} />
           <YAxis
             type="category"

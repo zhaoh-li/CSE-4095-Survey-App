@@ -8,6 +8,6 @@ export const buttonSecondary = `${base} border border-slate-300 bg-white text-sl
 export const buttonDanger = `${base} bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-300`
 
 export const inputClass =
-  'block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:border-slate-900 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-200'
+  'block min-h-11 w-full rounded-lg border border-slate-500 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-500 focus:border-slate-900 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-200'
 
 export const labelClass = 'block text-sm font-medium text-slate-700'

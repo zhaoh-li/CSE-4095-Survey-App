@@ -12,6 +12,7 @@ import LoadingMessage from './components/LoadingMessage'
 import ProtectedRoute from './components/ProtectedRoute'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
+import LogoutPage from './pages/LogoutPage'
 import NotFoundPage from './pages/NotFoundPage'
 import StudentSurveyPage from './pages/StudentSurveyPage'
 
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <LandingPage /> },
       { path: '/login', element: <LoginPage /> },
+      { path: '/logout', element: <LogoutPage /> },
       { path: '/s/:slug', element: <StudentSurveyPage /> },
       {
         // Instructor pages: signed-in only

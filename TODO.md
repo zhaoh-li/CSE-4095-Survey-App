@@ -219,43 +219,49 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 
 # Phase 13 — UI Polish
 
-- [ ] Add consistent page layouts.
-- [ ] Improve mobile responsiveness.
-- [ ] Add loading states.
-- [ ] Add empty states.
-- [ ] Add error messages.
-- [ ] Add confirmation dialogs for destructive actions.
-- [ ] Improve QR-code presentation for classroom projection.
-- [ ] Test accessibility and keyboard navigation.
-- [ ] Improve color contrast.
+- [x] Add consistent page layouts.
+- [x] Improve mobile responsiveness.
+- [x] Add loading states.
+- [x] Add empty states.
+- [x] Add error messages.
+- [x] Add confirmation dialogs for destructive actions.
+- [x] Improve QR-code presentation for classroom projection.
+- [x] Test accessibility and keyboard navigation.
+- [x] Improve color contrast.
+- [x] Add page titles, a skip link and focus management (D27).
+- [x] Make Logout ask about unsaved editor changes (D27).
+- [x] Add a Full Screen button to the Present page (D27).
 
 ---
 
 # Phase 14 — Testing
 
-- [ ] Test instructor login.
-- [ ] Test survey creation.
-- [ ] Test survey editing.
-- [ ] Test activation.
-- [ ] Test closing surveys.
-- [ ] Test QR-code links.
-- [ ] Test student submissions.
-- [ ] Test duplicate-submission prevention.
-- [ ] Test results calculations.
-- [ ] Test CSV export.
-- [ ] Test mobile layout.
-- [ ] Test with at least two browsers.
-- [ ] Test unauthorized access attempts.
-- [ ] Test database Row Level Security.
-- [ ] Run the full workflow locally: instructor creates a survey, adds questions and choices, activates it; student opens it and submits; responses are saved; instructor views results.
+- [x] Add unit tests with Vitest (`npm test`) (D27).
+- [x] Add end-to-end tests with Playwright (`npm run test:e2e`) (D27).
+- [x] Write TESTING.md with how to run each suite and the manual checks.
+- [x] Test instructor login.
+- [x] Test survey creation.
+- [x] Test survey editing.
+- [x] Test activation.
+- [x] Test closing surveys.
+- [x] Test QR-code links.
+- [x] Test student submissions.
+- [x] Test duplicate-submission prevention.
+- [x] Test results calculations.
+- [x] Test CSV export.
+- [x] Test mobile layout.
+- [x] Test with at least two browsers.
+- [x] Test unauthorized access attempts.
+- [x] Test database Row Level Security.
+- [x] Run the full workflow locally: instructor creates a survey, adds questions and choices, activates it; student opens it and submits; responses are saved; instructor views results.
 
 ### Database Verification (inspect in the Supabase Table Editor or SQL Editor)
 
-- [ ] Creating a survey stores a row in `surveys`.
-- [ ] Adding questions and choices creates rows in `questions` and `choices`.
-- [ ] Student submissions create rows in `responses` and `answers`.
-- [ ] Survey results can be retrieved from the database and match the Results page.
-- [ ] Data is still present after refreshing the application.
+- [x] Creating a survey stores a row in `surveys`.
+- [x] Adding questions and choices creates rows in `questions` and `choices`.
+- [x] Student submissions create rows in `responses` and `answers`.
+- [x] Survey results can be retrieved from the database and match the Results page.
+- [x] Data is still present after refreshing the application.
 
 ---
 

@@ -27,6 +27,7 @@ import {
   saveSurveyDraft,
 } from '../lib/surveys'
 import type { QuestionType, Survey } from '../lib/types'
+import { usePageTitle } from '../lib/use-page-title'
 
 /** What loading `/surveys/:id/edit` found. */
 type LoadState =
@@ -36,6 +37,8 @@ type LoadState =
   | { forId: string; kind: 'error'; message: string }
 
 type Busy = 'saving' | 'activating' | 'duplicating' | null
+
+const LAST_QUESTION = 'last-question'
 
 /** Focuses the first field with an error. Returns true if there was one. */
 function focusFirstError(errors: FieldErrors): boolean {
@@ -47,6 +50,7 @@ function focusFirstError(errors: FieldErrors): boolean {
 
 export default function EditorPage() {
   const { id: routeId } = useParams()
+  usePageTitle(routeId ? 'Edit Survey' : 'New Survey')
   const navigate = useNavigate()
 
   const [draft, dispatch] = useReducer(editorReducer, undefined, emptySurvey)
@@ -70,6 +74,8 @@ export default function EditorPage() {
   const loadedIdRef = useRef<string | null>(null)
   /** Lets our own navigation (after saving or activating) skip the unsaved-changes check. */
   const allowLeaveRef = useRef(false)
+  /** Where keyboard focus goes after the next render: a field ID or the newest question. */
+  const pendingFocusRef = useRef<string | null>(null)
 
   const dirty = useMemo(() => snapshot(draft) !== savedSnapshot, [draft, savedSnapshot])
   const errors = showErrorsFor ? validate(draft, showErrorsFor === 'activate') : {}
@@ -105,6 +111,17 @@ export default function EditorPage() {
   useEffect(() => {
     allowLeaveRef.current = false
   }, [routeId])
+
+  // Move focus after adding or deleting a question, so keyboard users aren't
+  // sent back to the top of the page. Runs after dialogs have closed.
+  useEffect(() => {
+    const target = pendingFocusRef.current
+    if (!target) return
+    pendingFocusRef.current = null
+    const last = draft.questions.at(-1)
+    const id = target === LAST_QUESTION ? last && fieldIds.questionText(last.key) : target
+    if (id) document.getElementById(id)?.focus()
+  })
 
   // Warn before closing or refreshing the tab with unsaved changes.
   useEffect(() => {
@@ -203,7 +220,12 @@ export default function EditorPage() {
 
   function requestDelete(question: DraftQuestion) {
     if (question.text.trim() || hasChoiceText(question)) setPendingDelete(question.key)
-    else dispatch({ type: 'removeQuestion', questionKey: question.key })
+    else removeQuestion(question.key)
+  }
+
+  function removeQuestion(questionKey: string) {
+    dispatch({ type: 'removeQuestion', questionKey })
+    pendingFocusRef.current = fieldIds.questions // the "+ Add Question" button
   }
 
   async function handleDuplicate(survey: Survey) {
@@ -355,7 +377,10 @@ export default function EditorPage() {
         <button
           id={fieldIds.questions}
           type="button"
-          onClick={() => dispatch({ type: 'addQuestion' })}
+          onClick={() => {
+            dispatch({ type: 'addQuestion' })
+            pendingFocusRef.current = LAST_QUESTION
+          }}
           className={buttonSecondary}
         >
           + Add Question
@@ -407,7 +432,7 @@ export default function EditorPage() {
         confirmLabel="Delete Question"
         danger
         onConfirm={() => {
-          if (pendingDelete) dispatch({ type: 'removeQuestion', questionKey: pendingDelete })
+          if (pendingDelete) removeQuestion(pendingDelete)
           setPendingDelete(null)
         }}
         onCancel={() => setPendingDelete(null)}

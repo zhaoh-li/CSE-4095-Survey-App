@@ -390,3 +390,25 @@ If a step fails, the editor stays open with the changes kept, and saved work is 
 - The CSV logic is unit tested with Vitest (`npm test`).
 
 **Why:** The file opens correctly in common spreadsheet apps without extra steps, and no responses are lost on large surveys.
+
+---
+
+## D27 — Testing approach and UI polish
+
+**Specs said:** TODO.md Phases 13–14 list polish items and tests, including "Test with at least two browsers", "Test mobile layout", "Test unauthorized access attempts" and a full workflow run, but not how to test them.
+
+**Decision:**
+
+- **Three automated suites,** described in TESTING.md: unit tests (Vitest, `npm test`), database tests (PGlite, `npm run test:db`) and end-to-end tests (Playwright, `npm run test:e2e`).
+- **End-to-end tests run in five setups:** Chromium, Firefox and WebKit on desktop, plus Pixel 7 and iPhone 14 screen sizes. Each one covers the full workflow, the editor and dashboard actions, unauthorized access, and an axe accessibility scan that fails on serious or critical WCAG A/AA problems.
+- **Tests that change data use a separate Supabase test project** set in `.env.test`, and refuse to run if it points at the same project as `.env`. Tests that never change data may use either project.
+- **Playwright's browsers are stored inside `node_modules`** (`PLAYWRIGHT_BROWSERS_PATH=0`), so nothing is installed elsewhere on the machine.
+- **Logout is a page (`/logout`),** so leaving the editor with unsaved changes asks first, as D22 requires.
+- **Accessibility polish:**
+  - every page sets its own tab title;
+  - instructor pages have a "Skip to main content" link;
+  - focus moves to new questions, to "+ Add Question" after a delete, and to the student's result message;
+  - input borders and placeholders meet WCAG contrast;
+  - the Present page has a Full Screen button where the browser supports it.
+
+**Why:** One command checks the whole app in several browsers and screen sizes without risking real classroom data. The polish fixes gaps that only show up for keyboard and screen reader users.

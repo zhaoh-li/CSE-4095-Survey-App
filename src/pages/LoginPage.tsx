@@ -3,9 +3,11 @@ import { Navigate, useLocation } from 'react-router-dom'
 import LoadingMessage from '../components/LoadingMessage'
 import { useAuth } from '../lib/auth-context'
 import { buttonPrimary, inputClass, labelClass } from '../lib/styles'
+import { usePageTitle } from '../lib/use-page-title'
 
 export default function LoginPage() {
   const { session, loading, signIn } = useAuth()
+  usePageTitle('Instructor Login')
   const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

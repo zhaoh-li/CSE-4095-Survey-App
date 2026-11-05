@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { buttonSecondary } from '../lib/styles'
+import { usePageTitle } from '../lib/use-page-title'
 
 export default function NotFoundPage() {
+  usePageTitle('Page not found')
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="space-y-4 text-center">

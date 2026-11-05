@@ -17,6 +17,7 @@ import {
   unarchiveSurvey,
 } from '../lib/surveys'
 import { STATUS_LABELS, type SurveyStatus, type SurveyWithCount } from '../lib/types'
+import { usePageTitle } from '../lib/use-page-title'
 
 type StatusFilter = 'all' | SurveyStatus
 
@@ -37,6 +38,7 @@ async function fetchSurveys(): Promise<LoadResult> {
 
 export default function DashboardPage() {
   const navigate = useNavigate()
+  usePageTitle('Dashboard')
 
   const [surveys, setSurveys] = useState<SurveyWithCount[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)

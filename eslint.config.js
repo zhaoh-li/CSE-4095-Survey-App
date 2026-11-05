@@ -20,5 +20,12 @@ export default tseslint.config(
       ecmaVersion: 2023,
       globals: globals.browser,
     },
+    rules: {
+      // A leading underscore marks an argument or variable as intentionally unused.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
   },
 )

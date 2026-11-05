@@ -12,6 +12,7 @@ import { formatPercent, plural } from '../lib/format'
 import { buttonPrimary, buttonSecondary } from '../lib/styles'
 import { getSurveyResults } from '../lib/surveys'
 import type { SurveyResults } from '../lib/types'
+import { usePageTitle } from '../lib/use-page-title'
 
 type LoadResult = { ok: true; results: SurveyResults | null } | { ok: false; error: string }
 
@@ -32,6 +33,7 @@ export default function ResultsPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
+  usePageTitle(results ? `Results: ${results.title}` : 'Results')
 
   const apply = useCallback(
     (result: LoadResult) => {
