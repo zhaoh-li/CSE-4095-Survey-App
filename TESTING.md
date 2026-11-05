@@ -35,6 +35,8 @@ Runs every file in `supabase/migrations/` in PGlite (Postgres in WebAssembly) an
 
 The tests drive real browsers through the app: Chromium, Firefox and WebKit on desktop, plus Pixel 7 and iPhone 14 screen sizes.
 
+They run against a **production build** (`vite build` + `vite preview`, in `dist-e2e/`) that sends the same security headers as Cloudflare, from `public/_headers`. Any Content Security Policy violation on any page fails the test (D28).
+
 | File | Changes data? | Runs against |
 |---|---|---|
 | `e2e/public.spec.ts` | No | `.env.test` if it exists, otherwise `.env` |
@@ -73,6 +75,16 @@ npm run test:e2e -- --project=chromium --headed    # watch the browser (needs WS
 ```
 
 Tests run one at a time, because only one survey can be active at once. Test surveys are named `E2E …` and are deleted before and after each run.
+
+### Against the live site
+
+After a deployment, run the read-only tests against production:
+
+```bash
+E2E_BASE_URL=https://cse4095-survey.pages.dev npm run test:e2e:prod
+```
+
+This runs only `e2e/public.spec.ts`, using `.env` (the main project), in all 5 browser setups. It checks that opening `/s/…`, `/dashboard` and unknown pages directly works (SPA routing), that the public key is refused by the main database, and that the live security headers don't block anything. No data is created. The workflow tests never run in this mode.
 
 ### When a test fails
 
@@ -138,6 +150,8 @@ After deployment (TODO.md Phase 15), scan a Present page QR code with a phone, a
 | 2026-11-05 | `npm test` | 38 passed | |
 | 2026-11-05 | `npm run test:db` | 45 passed | |
 | 2026-11-05 | `npm run test:e2e` | 53 passed, 12 skipped | Skipped = API checks, which run in chromium only. All 5 browser setups pass. |
+| 2026-11-05 | `npm run test:e2e` (production build + CSP) | 58 passed, 12 skipped | Adds the stale-tab test; no CSP violations |
+| | `npm run test:e2e:prod` | | |
 | 2026-11-05 | Keyboard only | Passed | All 8 checks |
 | 2026-11-05 | Database verification | Passed | Main project; counts match the Results page |
 | | Real phone | | |

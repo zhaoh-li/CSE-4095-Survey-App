@@ -1,7 +1,7 @@
 // Tests that never change data, so they can run against any project.
 
-import { expect, test } from '@playwright/test'
-import { expectAccessible, supabaseKey, supabaseUrl } from './helpers'
+import { expect } from '@playwright/test'
+import { expectAccessible, supabaseKey, supabaseUrl, test } from './helpers'
 
 test.describe('public pages', () => {
   test('landing page links to the instructor login', async ({ page }) => {

@@ -412,3 +412,27 @@ If a step fails, the editor stays open with the changes kept, and saved work is 
   - the Present page has a Full Screen button where the browser supports it.
 
 **Why:** One command checks the whole app in several browsers and screen sizes without risking real classroom data. The polish fixes gaps that only show up for keyboard and screen reader users.
+
+---
+
+## D28 — Deployment on Cloudflare Pages
+
+**Specs said:** The spec names Cloudflare Pages for hosting, and TODO.md Phase 15 lists the deployment steps, but not the build settings, security headers or what happens to open tabs after a new version is deployed.
+
+**Decision:**
+
+- **Hosting:** Cloudflare Pages, connected to the GitHub repository. Every push to `main` deploys.
+  - Build command `npm run build`, output folder `dist`, Node 22 (`.nvmrc` and `engines` in package.json).
+  - Site name `cse4095-survey`, a short address that is easy to read from a projector.
+- **Supabase settings in Cloudflare:** Production uses the main Supabase project. Preview deployments (other branches) use the test project, so experiments never touch real surveys. These are build-time variables, so changing them needs a new deployment.
+- **SPA routing:** Cloudflare Pages serves `index.html` for any path when the build has no `404.html`, so links such as `/s/x7kf2q` work when opened directly. No redirect rules are needed.
+- **Security headers** (`public/_headers`):
+  - a Content Security Policy that allows scripts only from the site itself, connections only to the site and `*.supabase.co`, and images from the site plus `data:`/`blob:` (the QR code), and forbids embedding the site in frames;
+  - `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and a `Permissions-Policy` that turns off camera, microphone, location and payments.
+- **Out-of-date tabs:**
+  - After a deployment, a tab opened earlier may ask for code files that no longer exist. The app then reloads itself once, which picks up the new version.
+  - If that fails again within 10 seconds, it stops and shows "This site was updated. Please reload." instead of a blank or technical error page.
+  - Other unexpected errors show "Something went wrong." with Reload and Home buttons.
+- **Testing:** the e2e tests run against a production build that sends the same headers, and fail on any CSP violation. `npm run test:e2e:prod` runs the read-only tests against the live site.
+
+**Why:** Deployments happen on every push without manual steps. The CSP limits the damage any injected script could do, and is checked in five browsers before it reaches production. Students and the instructor never see a broken page after an update.

@@ -10,6 +10,7 @@ import AuthProvider from './components/AuthProvider'
 import InstructorLayout from './components/InstructorLayout'
 import LoadingMessage from './components/LoadingMessage'
 import ProtectedRoute from './components/ProtectedRoute'
+import RouteError from './components/RouteError'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import LogoutPage from './pages/LogoutPage'
@@ -47,6 +48,7 @@ function EditorRoute() {
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
+    errorElement: <RouteError />,
     children: [
       { path: '/', element: <LandingPage /> },
       { path: '/login', element: <LoginPage /> },

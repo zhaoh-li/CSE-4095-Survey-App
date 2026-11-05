@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "test:db": "node --test supabase/tests/*.test.mjs",
     "test": "vitest run",
-    "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test"
+    "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test",
+    "test:e2e:prod": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test e2e/public.spec.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
@@ -44,5 +45,8 @@
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
     "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

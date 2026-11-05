@@ -2,14 +2,16 @@
 // create, activate, close and delete surveys, so they only run against the
 // separate test project in .env.test (see TESTING.md).
 
-import { expect, test, type Browser, type Page, type TestInfo } from '@playwright/test'
+import { expect, type Browser, type Page, type TestInfo } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import {
   TEST_PREFIX,
   deleteTestSurveys,
   expectAccessible,
+  guardCsp,
   logIn,
   seedClosedSurvey,
+  test,
   workflowSkipReason,
 } from './helpers'
 
@@ -23,7 +25,12 @@ const uniqueTitle = (testInfo: TestInfo, label: string) =>
   `${TEST_PREFIX}${label} ${testInfo.project.name} ${Date.now()}`
 
 /** A separate browser (own storage and token) with the same screen size as the project. */
-async function newStudent(browser: Browser, testInfo: TestInfo, url: string): Promise<Page> {
+async function newStudent(
+  browser: Browser,
+  testInfo: TestInfo,
+  url: string,
+  cspViolations: string[],
+): Promise<Page> {
   const { viewport, userAgent, deviceScaleFactor, isMobile, hasTouch } = testInfo.project.use
   const context = await browser.newContext({
     viewport,
@@ -32,6 +39,7 @@ async function newStudent(browser: Browser, testInfo: TestInfo, url: string): Pr
     isMobile,
     hasTouch,
   })
+  await guardCsp(context, cspViolations)
   const page = await context.newPage()
   await page.goto(url)
   return page
@@ -50,6 +58,7 @@ const resultRow = (page: Page, choice: string) =>
 test('full workflow: create, activate, answer, results, export, close, delete', async ({
   page,
   browser,
+  cspViolations,
 }, testInfo) => {
   const title = uniqueTitle(testInfo, 'Workflow')
   await logIn(page)
@@ -98,7 +107,7 @@ test('full workflow: create, activate, answer, results, export, close, delete', 
   const studentUrl = `${new URL(page.url()).origin}/s/${slug}`
 
   // --- Student 1: required answers, submit, duplicate protection ---------
-  const student1 = await newStudent(browser, testInfo, studentUrl)
+  const student1 = await newStudent(browser, testInfo, studentUrl, cspViolations)
   await expect(student1.getByRole('heading', { name: title })).toBeVisible()
   await expectAccessible(student1)
 
@@ -126,7 +135,7 @@ test('full workflow: create, activate, answer, results, export, close, delete', 
   await expect(student1.getByRole('heading', { name: already })).toBeVisible()
 
   // --- Student 2 ---------------------------------------------------------
-  const student2 = await newStudent(browser, testInfo, studentUrl)
+  const student2 = await newStudent(browser, testInfo, studentUrl, cspViolations)
   await radio(student2, 'A loop').check()
   await radio(student2, 'False').check()
   await submit(student2)
@@ -176,7 +185,7 @@ test('full workflow: create, activate, answer, results, export, close, delete', 
   await expect(page.getByRole('link', { name: 'Present QR' })).toHaveCount(0)
 
   const closedMessage = 'This survey is no longer accepting responses.'
-  const student3 = await newStudent(browser, testInfo, studentUrl)
+  const student3 = await newStudent(browser, testInfo, studentUrl, cspViolations)
   await expect(student3.getByRole('heading', { name: closedMessage })).toBeVisible()
 
   // --- Delete from the dashboard (stronger warning: it has responses) -----
@@ -284,4 +293,30 @@ test('dashboard: search, archive, filters, unarchive and duplicate', async ({ pa
   await expect(page).toHaveURL(/\/surveys\/[0-9a-f-]{36}\/edit$/)
   await expect(page.getByLabel('Survey Title')).toHaveValue(`Copy of ${title}`)
   await expect(page.getByLabel('Question text')).toHaveValue('Seeded question')
+})
+
+test('a stale tab shows "This site was updated." instead of a blank page (D28)', async ({
+  page,
+}) => {
+  await logIn(page)
+
+  // Simulate a tab opened before a deployment: the editor's code file is gone.
+  const editorCode = /\/assets\/EditorPage-[^/]*\.js$/
+  await page.route(editorCode, (route) => route.abort())
+  const autoReload = page.waitForEvent('load')
+  await page.getByRole('link', { name: 'New Survey' }).click()
+
+  // The app reloads itself once to fetch the new version. The file is still
+  // missing, so it then stops and shows the "Please reload" screen.
+  await autoReload
+  await expect(page.getByRole('heading', { name: 'This site was updated.' })).toBeVisible()
+
+  // Reload loads a new page: the marker set on the old page disappears.
+  // (Whether the editor then appears isn't checked: here the same file name
+  // comes back, which Safari may still treat as failed. After a real
+  // deployment the new version's files have new names.)
+  await page.evaluate(() => Object.assign(window, { e2eBeforeReload: true }))
+  await page.getByRole('button', { name: 'Reload' }).click()
+  await page.waitForFunction(() => !('e2eBeforeReload' in window))
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 })

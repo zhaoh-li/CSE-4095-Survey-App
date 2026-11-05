@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, type Page } from '@playwright/test'
+import { test as base, expect, type BrowserContext, type Page } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'node:fs'
 
@@ -27,6 +27,7 @@ function mainProjectUrl(): string | null {
  * test project configured in .env.test.
  */
 export function workflowSkipReason(): string | null {
+  if (process.env.E2E_BASE_URL) return 'Workflow tests never run against the live site.'
   if (!email || !password) {
     return 'Set E2E_EMAIL and E2E_PASSWORD in .env.test to run the workflow tests (see TESTING.md).'
   }
@@ -101,3 +102,33 @@ export async function deleteTestSurveys(): Promise<void> {
   }
   await client.auth.signOut()
 }
+
+/**
+ * Reports every Content Security Policy violation in the context's pages,
+ * across reloads, into `violations` (D28).
+ */
+export async function guardCsp(context: BrowserContext, violations: string[]): Promise<void> {
+  await context.exposeFunction('__reportCspViolation', (violation: string) => {
+    violations.push(violation)
+  })
+  await context.addInitScript(() => {
+    document.addEventListener('securitypolicyviolation', (event) => {
+      const report = (window as unknown as { __reportCspViolation: (v: string) => void })
+        .__reportCspViolation
+      report(`${event.violatedDirective} blocked ${event.blockedURI || 'inline code'}`)
+    })
+  })
+}
+
+/** Playwright's `test`, failing any test whose pages violate the Content Security Policy. */
+export const test = base.extend<{ cspViolations: string[] }>({
+  cspViolations: [
+    async ({ context }, use) => {
+      const violations: string[] = []
+      await guardCsp(context, violations)
+      await use(violations)
+      expect(violations, 'Content Security Policy violations').toEqual([])
+    },
+    { auto: true },
+  ],
+})

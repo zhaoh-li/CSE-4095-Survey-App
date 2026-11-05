@@ -267,7 +267,7 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 
 # Phase 15 — Deployment
 
-- [ ] Push the project to GitHub.
+- [x] Push the project to GitHub.
 - [ ] Create the Cloudflare Pages site.
 - [ ] Connect Cloudflare Pages to the GitHub repository.
 - [ ] Configure production environment variables.
@@ -278,6 +278,11 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 - [ ] Test student submissions in production.
 - [ ] Test instructor results in production.
 - [ ] Run the full workflow again in production.
+- [x] Add security headers with a Content Security Policy (D28).
+- [x] Recover from out-of-date tabs after a deployment (D28).
+- [x] Pin Node 22 for the Cloudflare build (D28).
+- [x] Add read-only production tests (`npm run test:e2e:prod`) (D28).
+- [ ] Run `npm run test:e2e:prod` against the live site.
 
 ---
 

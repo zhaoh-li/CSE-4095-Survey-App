@@ -36,3 +36,6 @@ CLAUDE.md
 test-results/
 playwright-report/
 blob-report/
+
+# E2E production build
+dist-e2e/
