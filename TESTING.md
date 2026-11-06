@@ -81,7 +81,7 @@ Tests run one at a time, because only one survey can be active at once. Test sur
 After a deployment, run the read-only tests against production:
 
 ```bash
-E2E_BASE_URL=https://cse4095-survey.pages.dev npm run test:e2e:prod
+E2E_BASE_URL=https://cse-4095-survey.gustluff.workers.dev npm run test:e2e:prod
 ```
 
 This runs only `e2e/public.spec.ts`, using `.env` (the main project), in all 5 browser setups. It checks that opening `/s/…`, `/dashboard` and unknown pages directly works (SPA routing), that the public key is refused by the main database, and that the live security headers don't block anything. No data is created. The workflow tests never run in this mode.
@@ -151,7 +151,7 @@ After deployment (TODO.md Phase 15), scan a Present page QR code with a phone, a
 | 2026-11-05 | `npm run test:db` | 45 passed | |
 | 2026-11-05 | `npm run test:e2e` | 53 passed, 12 skipped | Skipped = API checks, which run in chromium only. All 5 browser setups pass. |
 | 2026-11-05 | `npm run test:e2e` (production build + CSP) | 58 passed, 12 skipped | Adds the stale-tab test; no CSP violations |
-| | `npm run test:e2e:prod` | | |
+| 2026-11-05 | `npm run test:e2e:prod` | 38 passed, 12 skipped | Live site https://cse-4095-survey.gustluff.workers.dev |
 | 2026-11-05 | Keyboard only | Passed | All 8 checks |
 | 2026-11-05 | Database verification | Passed | Main project; counts match the Results page |
-| | Real phone | | |
+| 2026-11-05 | Real phone | Passed | Scanned the QR code on the live site; answers and the live count updated; also tested in a second browser |

@@ -268,37 +268,37 @@ This roadmap breaks the implementation into small, testable phases ordered from 
 # Phase 15 — Deployment
 
 - [x] Push the project to GitHub.
-- [ ] Create the Cloudflare Pages site.
-- [ ] Connect Cloudflare Pages to the GitHub repository.
-- [ ] Configure production environment variables.
-- [ ] Deploy the application.
-- [ ] Configure SPA routing.
-- [ ] Verify production login.
-- [ ] Verify QR codes point to the production URL.
-- [ ] Test student submissions in production.
-- [ ] Test instructor results in production.
-- [ ] Run the full workflow again in production.
+- [x] Create the Cloudflare Pages site.
+- [x] Connect Cloudflare Pages to the GitHub repository.
+- [x] Configure production environment variables.
+- [x] Deploy the application.
+- [x] Configure SPA routing.
+- [x] Verify production login.
+- [x] Verify QR codes point to the production URL.
+- [x] Test student submissions in production.
+- [x] Test instructor results in production.
+- [x] Run the full workflow again in production.
 - [x] Add security headers with a Content Security Policy (D28).
 - [x] Recover from out-of-date tabs after a deployment (D28).
 - [x] Pin Node 22 for the Cloudflare build (D28).
 - [x] Add read-only production tests (`npm run test:e2e:prod`) (D28).
-- [ ] Run `npm run test:e2e:prod` against the live site.
+- [x] Run `npm run test:e2e:prod` against the live site.
 
 ---
 
 # Assignment Deliverables
 
-- [ ] Commit the database schema/migration SQL to `supabase/`. It must implement DATABASE.md as modified by DECISIONS.md (no anonymous read/insert policies; include `get_public_survey`, `submit_survey_response`, `activate_survey`, `close_survey`).
-- [ ] Write README.md with setup and deployment instructions.
+- [x] Commit the database schema/migration SQL to `supabase/`. It must implement DATABASE.md as modified by DECISIONS.md (no anonymous read/insert policies; include `get_public_survey`, `submit_survey_response`, `activate_survey`, `close_survey`).
+- [x] Write README.md with setup and deployment instructions.
 - [x] Record design decisions in DECISIONS.md.
-- [ ] Commit all five provided documents with their original file names (Classroom_Survey_Web_App_Specification.md, TODO.md, DATABASE.md, API.md, UI.md), plus DECISIONS.md.
+- [x] Commit all five provided documents with their original file names (Classroom_Survey_Web_App_Specification.md, TODO.md, DATABASE.md, API.md, UI.md), plus DECISIONS.md.
 - [x] Add `.env` to `.gitignore` before the first commit that includes environment files.
 - [ ] Create a separate grader test account; submit its login privately through HuskyCT, not in the repo (D6).
-- [ ] Confirm no secrets (service-role key, passwords) are committed.
+- [x] Confirm no secrets (service-role key, passwords) are committed.
 - [ ] Take database screenshots: tables, a survey with questions, stored responses, results in the app. Use made-up test submissions only — no real student information.
 - [ ] Write the 1–2 page development summary.
 - [ ] Export the AI conversation history or write a Markdown summary.
-- [ ] Test on a real mobile device.
+- [x] Test on a real mobile device.
 
 ---
 

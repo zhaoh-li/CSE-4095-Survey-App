@@ -39,3 +39,7 @@ blob-report/
 
 # E2E production build
 dist-e2e/
+
+# Assignment instructions and HuskyCT deliverables (submitted separately, not committed)
+Assignment.md
+docs/
